@@ -94,7 +94,7 @@
         <input class="form-control text-center" type="text" placeholder="Search Item">
     </section>
     <section class="p-2">
-        <table id="tbl-item" class="table table-hover table-bordered">
+        <table id="tbl-items" class="table table-hover table-bordered">
             <thead class="table-light">
             <tr>
                 <th class="text-center">Code</th>
@@ -148,6 +148,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
+
+                <div class="mb-3">
+                    <label for="txt-item-code" class="form-label">Item Code</label>
+                    <input type="text" class="form-control text-center" id="txt-item-code" placeholder="Generated Item Code"
+                           disabled>
+                </div>
 
                 <div class="mb-3">
                     <label for="txt-name" class="form-label">Item Description</label>
