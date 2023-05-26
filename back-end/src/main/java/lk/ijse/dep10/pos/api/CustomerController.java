@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.*;
@@ -22,12 +21,13 @@ public class CustomerController {
     @Autowired
     private BasicDataSource pool;
 
+    // GET http://localhost:8080/pos/customers?q=Galle
     @GetMapping
-    public ResponseEntity<?> getCustomers(@RequestParam(value = "q", required = false)String query){
-    if(query== null ) query = "";
+    public Object getCustomers(@RequestParam(value = "q", required = false) String query) {
+        if (query == null) query = "";
         try (Connection connection = pool.getConnection()) {
-            PreparedStatement stm = connection.prepareStatement(
-                    "SELECT * FROM customer WHERE id LIKE ? OR name LIKE ? Or address LIKE ? OR contact Like ?");
+            PreparedStatement stm = connection.prepareStatement
+                    ("SELECT * FROM customer WHERE id LIKE ? OR name LIKE ? OR address LIKE ? OR contact LIKE ?");
             query = "%" + query + "%";
             for (int i = 1; i <= 4; i++) {
                 stm.setString(i, query);
@@ -40,24 +40,19 @@ public class CustomerController {
                 String address = rst.getString("address");
                 String contact = rst.getString("contact");
                 customerList.add(new CustomerDTO(id, name, address, contact));
-
             }
             HttpHeaders headers = new HttpHeaders();
-            headers.add("X-Count", customerList.size()+"");
-            return new ResponseEntity<>(customerList,headers, HttpStatus.OK);
+            headers.add("X-Count", customerList.size() + "");
+            return new ResponseEntity<>(customerList, headers, HttpStatus.OK);
         } catch (SQLException e) {
-            ///////////////////////////////////
             e.printStackTrace();
-            return new ResponseEntity<>(new ResponseErrorDTO(500,e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
-
+            return new ResponseEntity<>(new ResponseErrorDTO(500, e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-
-
     }
 
     @PostMapping
-    public ResponseEntity<?> saveCustomer(@RequestBody CustomerDTO customer){
+    public ResponseEntity<?> saveCustomer(@RequestBody CustomerDTO customer) {
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
@@ -77,11 +72,11 @@ public class CustomerController {
             customer.setId(id);
             return new ResponseEntity<>(customer, HttpStatus.CREATED);
         } catch (SQLException e) {
-            if (e.getSQLState().equals("23000")){
+            if (e.getSQLState().equals("23000")) {
                 return new ResponseEntity<>(
-                        new ResponseErrorDTO(HttpStatus.CONFLICT.value(),e.getMessage()),
+                        new ResponseErrorDTO(HttpStatus.CONFLICT.value(), e.getMessage()),
                         HttpStatus.CONFLICT);
-            }else{
+            } else {
                 return new ResponseEntity<>(
                         new ResponseErrorDTO(500, e.getMessage()),
                         HttpStatus.INTERNAL_SERVER_ERROR);

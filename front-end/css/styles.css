@@ -63,3 +63,14 @@ main {
         transform: rotate(360deg);
     }
 }
+#progress-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 4px;
+    background-color: dodgerblue;
+    z-index: 9999;
+
+
+}
