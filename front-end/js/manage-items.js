@@ -71,3 +71,9 @@ function invalidate(txt, msg) {
 }
 
 
+function resetForm(clearData) {
+    [txtItemCode, txtDescription, txtUnitPrice, txtStock].forEach(txt => {
+        txt.removeClass("is-invalid animate__shakeX");
+        if (clearData) txt.val('');
+    });
+}
