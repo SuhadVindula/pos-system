@@ -4,11 +4,15 @@ import lk.ijse.dep10.pos.dto.CustomerDTO;
 import lk.ijse.dep10.pos.dto.ResponseErrorDTO;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/customers")
@@ -17,6 +21,40 @@ public class CustomerController {
 
     @Autowired
     private BasicDataSource pool;
+
+    @GetMapping
+    public ResponseEntity<?> getCustomers(@RequestParam(value = "q", required = false)String query){
+    if(query== null ) query = "";
+        try (Connection connection = pool.getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(
+                    "SELECT * FROM customer WHERE id LIKE ? OR name LIKE ? Or address LIKE ? OR contact Like ?");
+            query = "%" + query + "%";
+            for (int i = 1; i <= 4; i++) {
+                stm.setString(i, query);
+            }
+            ResultSet rst = stm.executeQuery();
+            List<CustomerDTO> customerList = new ArrayList<>();
+            while (rst.next()) {
+                int id = rst.getInt("id");
+                String name = rst.getString("name");
+                String address = rst.getString("address");
+                String contact = rst.getString("contact");
+                customerList.add(new CustomerDTO(id, name, address, contact));
+
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("X-Count", customerList.size()+"");
+            return new ResponseEntity<>(customerList,headers, HttpStatus.OK);
+        } catch (SQLException e) {
+            ///////////////////////////////////
+            e.printStackTrace();
+            return new ResponseEntity<>(new ResponseErrorDTO(500,e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
+
+
+
+    }
 
     @PostMapping
     public ResponseEntity<?> saveCustomer(@RequestBody CustomerDTO customer){
