@@ -1,5 +1,5 @@
 const tbodyElm = $('tbl-items tbody');
-const modalElm = $('new-item-modal');
+const modalElm = $('#new-item-modal');
 const txtItemCode = $("#txt-item-code");
 const txtDescription = $("#txt-description");
 const txtUnitPrice = $("#txt-unit-price");
@@ -25,7 +25,7 @@ function generateNewItemCode(){
     $(txtElm).addClass('animate__animated'));
 
 modalElm.on("show.bs.modal",()=>{
-    txtId.val(generateNewItemCode());
+    txtItemCode.val(generateNewItemCode());
 
 });
 
