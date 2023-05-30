@@ -19,5 +19,4 @@ public class WebAppConfig {
     public ItemController itemController(){
         return new ItemController();
     }
-
 }
