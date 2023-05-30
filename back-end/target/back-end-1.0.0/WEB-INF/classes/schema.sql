@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS item
     code VARCHAR(50)  PRIMARY KEY,
     description    VARCHAR(100) NOT NULL,
     qty INT(20)  NOT NULL,
-    unite_price DECIMAL (10,2) NOT NULL
+    unit_price DECIMAL (10,2) NOT NULL
 
 );
 
