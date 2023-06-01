@@ -1,6 +1,8 @@
 import {DateTimeFormatter, LocalDateTime} from '../node_modules/@js-joda/core/dist/js-joda.esm.js';
 import {Big} from '../node_modules/big.js/big.mjs';
 import {Cart} from "./cart.js";
+import {showProgress, showToast} from "./main.js";
+import {getBillDesignHTML} from "./bill-design.js";
 
 /* Module Level Variables, Constants */
 
@@ -13,6 +15,7 @@ const netTotalElm = $("#net-total");
 const itemInfoElm = $("#item-info");
 const customerNameElm = $("#customer-name");
 const frmOrder = $("#frm-order");
+const btnPlaceOrder = $("#btn-place-order");
 const txtCustomer = $("#txt-customer");
 const txtCode = $("#txt-code");
 const txtQty = $("#txt-qty");
@@ -97,8 +100,46 @@ tbodyElm.on('click', 'svg.delete', (eventData) => {
         txtCode.trigger('focus');
     }
 });
+btnPlaceOrder.on('click', ()=> placeOrder());
 
 /* Functions */
+
+function placeOrder(){
+    if (!cart.itemList.length) return;
+
+    cart.dateTime = orderDateTimeElm.text();
+    btnPlaceOrder.attr('disabled', true);
+    const xhr = new XMLHttpRequest();
+
+    const jqxhr = $.ajax(`${REST_API_BASE_URL}/orders`, {
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(cart),
+        xhr: ()=> xhr
+    });
+
+    showProgress(xhr);
+
+    jqxhr.done((orderId)=> {
+        printBill(orderId);
+        cart.clear();
+        $("#btn-clear-customer").trigger('click');
+        txtCode.val("");
+        txtCode.trigger("input");
+        tbodyElm.empty();
+        tFootElm.show();
+        showToast('success', 'Success', 'Order has been placed successfully');
+    });
+    jqxhr.fail(()=> {
+        showToast('error', 'Failed', "Failed to place the order, try again!");
+    });
+    jqxhr.always(()=> btnPlaceOrder.removeAttr('disabled'));
+}
+
+function printBill(orderId) {
+    const billWindow = open("", `_blank`, "popup=true,width=200");
+    billWindow.document.write(getBillDesignHTML(cart, orderId));
+}
 
 function updateOrderDetails() {
     const id = cart.customer?.id.toString().padStart(3, '0');
@@ -197,7 +238,7 @@ function findCustomer() {
     if (socket.readyState === socket.OPEN) socket.send(idOrContact);
 }
 
-function formatPrice(price) {
+export function formatPrice(price) {
     return new Intl.NumberFormat('en-LK', {
         style: 'currency',
         currency: 'LKR',
@@ -206,7 +247,7 @@ function formatPrice(price) {
     }).format(price);
 }
 
-function formatNumber(number) {
+export function formatNumber(number) {
     return new Intl.NumberFormat('en-LK', {
         style: 'decimal',
         minimumFractionDigits: 2,
